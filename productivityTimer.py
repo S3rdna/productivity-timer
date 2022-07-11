@@ -25,28 +25,10 @@ window = tk.Tk()
 frame = tk.Frame( master=window )
 frame.grid(row=0 , column=0,columnspan=3)
 
-## Create a function that updates the timer_label recursively after a set timeß
-def movTime():
-    global prev_time
-    global now
-    global running_time
 
-    # TODO: Creating timers instead of getting a time for each tick
-    now = time.monotonic_ns() # Starts a timer each tick 
-
-    print("Time {} ; Timer start flag {}".format(running_time,timer_started))
-    
-    if timer_started == True:
-        running_time += (now - prev_time)/10**8 # Running sum of time
-        time_elapsed_string = "Time: {:<.3f}".format(running_time) # Format label string
-        timer_label.config(text=time_elapsed_string) #Update timer_label 
-        
-    prev_time = now # Reference to previous timer for math 
-    time.sleep(1*10**-8) # Wait one nanosecond
-   
 
 ## Initalize label on GUI
-timer_label = tk.Label(frame, font = ('calibri',40, 'bold'), background = 'pink',foreground = 'white',width=11,text="Time 0.000") 
+timer_label = tk.Label(frame, font = ('calibri',40, 'bold'), background = '#231942',foreground = '#e0b1cb',width=11,text="Time: 0.000") 
 timer_label.pack()
 
 ### Create button 1
@@ -74,11 +56,11 @@ def start_btn_pressed():
 
 frame = tk.Frame(
             master=window,
-            relief=tk.RAISED,
             borderwidth=2,
+            background="#231942"
         )
 frame.grid(row=1 , column=0)
-start_btn = tk.Button(master=frame , text="Start" , command=start_btn_pressed)
+start_btn = tk.Button(master=frame , text="Start" , command=start_btn_pressed, background="#231942")
 start_btn.pack()
 
 ### Create button 2 
@@ -103,14 +85,34 @@ def reset_btn_pressed():
 
 frame = tk.Frame(
             master=window,
-            relief=tk.RAISED,
             borderwidth=2,
+            background="#231942"
         )
 frame.grid(row=1 , column=2)
-reset_btn = tk.Button(master=frame, text='Reset', command=reset_btn_pressed)
+reset_btn = tk.Button(master=frame, text='Reset', command=reset_btn_pressed,background="#231942")
 reset_btn.pack()
 
+#### Util Functions
 
+## Create a function that updates the timer_label recursively after a set timeß
+def movTime():
+    global prev_time
+    global now
+    global running_time
+
+    # TODO: Creating timers instead of getting a time for each tick
+    now = time.monotonic_ns() # Starts a timer each tick 
+
+    print("Time {} ; Timer start flag {}".format(running_time,timer_started))
+    
+    if timer_started == True:
+        running_time += (now - prev_time)/10**8 # Running sum of time
+        time_elapsed_string = "Time: {:<.3f}".format(running_time) # Format label string
+        timer_label.config(text=time_elapsed_string) #Update timer_label 
+        
+    prev_time = now # Reference to previous timer for math 
+    time.sleep(1*10**-8) # Wait one nanosecond
+   
 ## Create a function to close the program
 def on_close():
     global user_quit 
