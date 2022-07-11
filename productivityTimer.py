@@ -9,12 +9,10 @@ user_quit = False
 #### Create a GUI with a label (timer) and 2 buttons (start and stop/reset)
 
 ### Global Variables for GUI
-timer_started = False # tracking if timer has been started or stopped by the user
-time_at_start_press = 0 # Initalizing start variable (tracking time at button press)
-time_at_pause_press = 0
-first_time = True
-delta_time = 0
-delta_pause_time = 0
+timer_started = False # flag if timer has been started or stopped by the user
+now = 0 # int for timer at each tick
+prev_time = 0 # int for reference to last "now"
+running_time = 0 # int for sum of running time
 
 
 
@@ -27,29 +25,28 @@ window = tk.Tk()
 frame = tk.Frame( master=window )
 frame.grid(row=0 , column=0,columnspan=3)
 
-## Create a function that updates the timer_label recursively after a set time
-# FIXME: Fix format of displayed time on label
-
+## Create a function that updates the timer_label recursively after a set timeß
 def movTime():
-    global time_at_start_press
-    global time_at_pause_press
-    global delta_time
-    global delta_pause_time
+    global prev_time
+    global now
+    global running_time
 
-    # FIXME: Fix running time (time when paused is being added to delta time)
-    print()
+    # TODO: Creating timers instead of getting a time for each tick
+    now = time.monotonic_ns() # Starts a timer each tick 
+
+    print("Time {} ; Timer start flag {}".format(running_time,timer_started))
+    
     if timer_started == True:
-        now = time.monotonic_ns() # Time saved at each update
-        delta_time = (now - time_at_start_press)/10**8
-        time_elapsed_string = "Time: {:<.3f}".format(delta_time)
-        timer_label.config(text=time_elapsed_string)
-    else:
-        now = time.monotonic_ns()
-        delta_pause_time = (now - time_at_pause_press - delta_pause_time)/10**8
-    timer_label.after(10,movTime) #(wait time in miliseconds,function)
+        running_time += (now - prev_time)/10**8 # Running sum of time
+        time_elapsed_string = "Time: {:<.3f}".format(running_time) # Format label string
+        timer_label.config(text=time_elapsed_string) #Update timer_label 
+        
+    prev_time = now # Reference to previous timer for math 
+    time.sleep(1*10**-8) # Wait one nanosecond
    
 
-timer_label = tk.Label(frame, font = ('calibri',40, 'bold'), background = 'pink',foreground = 'white',width=11,text="Time 0.000")
+## Initalize label on GUI
+timer_label = tk.Label(frame, font = ('calibri',40, 'bold'), background = 'pink',foreground = 'white',width=11,text="Time 0.000") 
 timer_label.pack()
 
 ### Create button 1
@@ -58,10 +55,8 @@ timer_label.pack()
 def stop_btn_pressed():
 
     global timer_started
-    global time_at_pause_press
 
     timer_started=False
-    time_at_pause_press = time.monotonic_ns()
 
     start_btn.config(command=start_btn_pressed,text="Start")
     print(timer_started)
@@ -70,19 +65,10 @@ def stop_btn_pressed():
 def start_btn_pressed():
 
     global timer_started
-    global time_at_start_press
-    global first_time
 
-    if first_time:
-        time_at_start_press = time.monotonic_ns()
-        timer_started=True
-        first_time = False
-        start_btn.config(command=stop_btn_pressed,text="Stop")
-        print(timer_started)
-    else:
-        timer_started=True
-        start_btn.config(command=stop_btn_pressed,text="Stop")
-        print(timer_started)
+    timer_started=True
+    start_btn.config(command=stop_btn_pressed,text="Stop")
+    print(timer_started)
     
 
 
@@ -101,7 +87,18 @@ start_btn.pack()
 ## Create function for reset button pressed 
 def reset_btn_pressed():
     
-    global time_at_start_press 
+    global timer_started
+    global running_time
+    
+    if timer_started: # Resets Start button if timer is reset while on 
+        stop_btn_pressed()
+
+
+    running_time = 0 # Reset running time
+    time_elapsed_string = "Time: {:<.3f}".format(running_time) # Format label string
+    timer_label.config(text=time_elapsed_string)
+
+
     
 
 frame = tk.Frame(
@@ -125,13 +122,14 @@ def on_close():
 def main():
     
     window.protocol("WM_DELETE_WINDOW", on_close) # handles for close button pressed event
-    movTime()
 
     while True:
 
+        movTime()
         if user_quit:
             sys.exit()
-            break
+            quit()
+            
         else:            
             window.update()
             window.update_idletasks()
