@@ -121,8 +121,8 @@ frame = tk.Frame(
     master=window 
 )
 frame.grid(row=1,column=3)
-test = sum(times_list)
-testlabl = tk.Label(frame, font = ('calibri',40, 'bold'), background = '#231942',foreground = '#e0b1cb',width=11,text=test) 
+# test = sum(times_list)
+testlabl = tk.Label(frame, font = ('calibri',40, 'bold'), background = '#231942',foreground = '#e0b1cb',width=11,text="test") 
 testlabl.pack()
 
 #### Util Functions
