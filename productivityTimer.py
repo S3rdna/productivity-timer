@@ -75,10 +75,10 @@ def reset_btn_pressed():
     if timer_started: # Resets Start button if timer is reset while on 
         stop_btn_pressed()
 
-
     running_time = 0 # Reset running time
     time_elapsed_string = "Time: {:<.3f}".format(running_time) # Format label string
     timer_label.config(text=time_elapsed_string)
+    
 
 
     
@@ -91,6 +91,39 @@ frame = tk.Frame(
 frame.grid(row=1 , column=2)
 reset_btn = tk.Button(master=frame, text='Reset', command=reset_btn_pressed,background="#231942")
 reset_btn.pack()
+
+### Create button 3
+
+def store_btn_pressed():
+    times_list.insert(0,"{:<.3f}s".format(running_time))
+    reset_btn_pressed()
+
+frame = tk.Frame(
+            master=window,
+            borderwidth=2,
+            background="#231942"
+        )
+frame.grid(row=1,column=1)
+store_btn = tk.Button(master=frame,text="Store", command=store_btn_pressed)
+store_btn.pack()
+
+### Times Display Label
+
+frame = tk.Frame(
+    master = window,
+)
+
+frame.grid(row=0, column=3,rowspan=2)
+times_list = tk.Listbox(frame, font = ('calibri',40, 'bold'),foreground = '#fff',width=11) 
+times_list.pack()
+
+frame = tk.Frame(
+    master=window 
+)
+frame.grid(row=1,column=3)
+test = sum(times_list)
+testlabl = tk.Label(frame, font = ('calibri',40, 'bold'), background = '#231942',foreground = '#e0b1cb',width=11,text=test) 
+testlabl.pack()
 
 #### Util Functions
 
@@ -107,6 +140,7 @@ def movTime():
     
     if timer_started == True:
         running_time += (now - prev_time)/10**8 # Running sum of time
+        # TODO: Format time to have minutes and hours
         time_elapsed_string = "Time: {:<.3f}".format(running_time) # Format label string
         timer_label.config(text=time_elapsed_string) #Update timer_label 
         
@@ -129,12 +163,12 @@ def main():
 
         movTime()
         if user_quit:
-            sys.exit()
-            quit()
             
-        else:            
-            window.update()
-            window.update_idletasks()
+            sys.exit()
+            # quit()
+
+        window.update()
+        window.update_idletasks()
             
             
 
