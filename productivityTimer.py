@@ -1,9 +1,51 @@
+from cProfile import run
 import sys
 import time 
 import tkinter as tk
 
 ####* Global Variables 
 user_quit = False
+INIT_TIME_LABEL_TEXT = "0:00:00.00"
+
+####* Util Functions
+
+## Create a function that updates the timer_label recursively after a set timeß
+def movTime():
+    global prev_time
+    global now
+    global running_time
+
+    now = time.time() # Starts a timer each tick 
+
+    print("Time {} ; Timer start flag {}".format(running_time,timer_started))
+    
+    if timer_started == True:
+        
+        running_time += (now - prev_time) # Holds a running total of the time passed, calulated by the difference of the time of this tick and last tick
+        timer_label.config(text=format_time(running_time)) #Update timer_label 
+        
+    prev_time = now # Reference to previous timer for math 
+    time.sleep(1*10**-8) # Wait one nanosecond
+   
+
+## Create a function to format time (seconds) to string
+def format_time(rt):
+
+    hrs = rt/3600 # The amount of hours passed in float
+    hrs_mod = hrs - int(hrs) # The fractional part of the hour 
+    mins = hrs_mod * 60 # Fractional hour (hrs)* 60/1 (mins/hrs)
+    mins_mod = mins - int(mins) # The fractional part of minutes
+    secs = mins_mod * 60 # Fractional minutes (mins) * 60/1 (mins/secs)
+    
+    return "{}:{:02}:{:=05.02f}".format(int(hrs),int(mins),secs) # Format label string
+    
+
+## Create a function to close the program
+def on_close():
+    global user_quit 
+    user_quit = True
+
+
 
 
 ####* Create a GUI with a label (timer) and 2 buttons (start and stop/reset)
@@ -21,7 +63,7 @@ saved_times_array = []
 window = tk.Tk()
 # window.geometry("450x300")
 
-###* Create label
+###* Create Running time label
 
 frame = tk.Frame( master=window )
 frame.grid(row=0 , column=0,columnspan=3)
@@ -29,10 +71,10 @@ frame.grid(row=0 , column=0,columnspan=3)
 
 
 ## Initalize label on GUI
-timer_label = tk.Label(frame, font = ('calibri',40, 'bold'), background = '#231942',foreground = '#e0b1cb',width=11,text="Time: 0:00:0.000") 
+timer_label = tk.Label(frame, font = ('calibri',40, 'bold'), background = '#231942',foreground = '#e0b1cb',width=11,text=INIT_TIME_LABEL_TEXT) 
 timer_label.pack()
 
-###* Create button 1
+###* Create Start/Stop Button
 
 ## Create a function for the stop button press  
 def stop_btn_pressed():
@@ -64,7 +106,7 @@ frame.grid(row=1 , column=0)
 start_btn = tk.Button(master=frame , text="Start" , command=start_btn_pressed, background="#231942")
 start_btn.pack()
 
-###* Create button 2 
+###* Create Reset Button 
 
 
 ## Create function for reset button pressed 
@@ -77,8 +119,7 @@ def reset_btn_pressed():
         stop_btn_pressed()
 
     running_time = 0 # Reset running time
-    time_elapsed_string = "Time: {:<.3f}".format(running_time) # Format label string
-    timer_label.config(text=time_elapsed_string)
+    timer_label.config(text=format_time(running_time))
     
 
 
@@ -93,17 +134,17 @@ frame.grid(row=1 , column=2)
 reset_btn = tk.Button(master=frame, text='Reset', command=reset_btn_pressed,background="#231942")
 reset_btn.pack()
 
-###* Create button 3
+###* Create Store Button 
 
 def store_btn_pressed():
     global saved_times_array
     
     temp = running_time
     saved_times_array.append(temp)
-    sum_of_times_lbl.config(text="{:<.3f}s".format(max(0,sum(saved_times_array))))
+    sum_of_times_lbl.config(text=format_time(max(0,sum(saved_times_array))))
 
 
-    times_list.insert(0,"{:<.3f}s".format(temp))
+    times_list.insert(0,format_time(temp))
     
     reset_btn_pressed()
 
@@ -133,42 +174,8 @@ frame = tk.Frame(
 )
 frame.grid(row=1,column=3)
 # test = sum(times_list)
-sum_of_times_lbl = tk.Label(frame, font = ('calibri',40, 'bold'), background = '#231942',foreground = '#e0b1cb',width=11,text=max(0,sum(saved_times_array))) 
+sum_of_times_lbl = tk.Label(frame, font = ('calibri',40, 'bold'), background = '#231942',foreground = '#e0b1cb',width=11,text= format_time(max(0,sum(saved_times_array)))) 
 sum_of_times_lbl.pack()
-
-####* Util Functions
-
-## Create a function that updates the timer_label recursively after a set timeß
-def movTime():
-    global prev_time
-    global now
-    global running_time
-
-    now = time.time() # Starts a timer each tick 
-
-    print("Time {} ; Timer start flag {}".format(running_time,timer_started))
-    
-    if timer_started == True:
-        
-        running_time += (now - prev_time) # 
-        hrs = running_time/3600 # 
-        hrs_mod = hrs - int(hrs) # 
-        mins = hrs_mod * 60 # 
-        mins_mod = mins - int(mins) 
-        secs = mins_mod * 60 
-
-        print("hrs {}, hR {}, mins {} , mR {} , secs {:<.3f} ".format(hrs,hrs_mod,mins,mins_mod,secs))
-        # TODO: Format time to have minutes and hours
-        time_elapsed_string = "Time: {}:{:02}:{:<.3f}".format(int(hrs),int(mins),secs) # Format label string
-        timer_label.config(text=time_elapsed_string) #Update timer_label 
-        
-    prev_time = now # Reference to previous timer for math 
-    time.sleep(1*10**-8) # Wait one nanosecond
-   
-## Create a function to close the program
-def on_close():
-    global user_quit 
-    user_quit = True
 
 
 ####* Main function
