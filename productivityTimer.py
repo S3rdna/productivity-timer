@@ -2,25 +2,26 @@ import sys
 import time 
 import tkinter as tk
 
-#### Global Variables 
+####* Global Variables 
 user_quit = False
 
 
-#### Create a GUI with a label (timer) and 2 buttons (start and stop/reset)
+####* Create a GUI with a label (timer) and 2 buttons (start and stop/reset)
 
-### Global Variables for GUI
+###* Global Variables for GUI
 timer_started = False # flag if timer has been started or stopped by the user
 now = 0 # int for timer at each tick
 prev_time = 0 # int for reference to last "now"
 running_time = 0 # int for sum of running time
+saved_times_array = []
 
 
 
-### Create window
+###* Create window
 window = tk.Tk()
 # window.geometry("450x300")
 
-### Create label
+###* Create label
 
 frame = tk.Frame( master=window )
 frame.grid(row=0 , column=0,columnspan=3)
@@ -28,10 +29,10 @@ frame.grid(row=0 , column=0,columnspan=3)
 
 
 ## Initalize label on GUI
-timer_label = tk.Label(frame, font = ('calibri',40, 'bold'), background = '#231942',foreground = '#e0b1cb',width=11,text="Time: 0.000") 
+timer_label = tk.Label(frame, font = ('calibri',40, 'bold'), background = '#231942',foreground = '#e0b1cb',width=11,text="Time: 0:00:0.000") 
 timer_label.pack()
 
-### Create button 1
+###* Create button 1
 
 ## Create a function for the stop button press  
 def stop_btn_pressed():
@@ -63,7 +64,7 @@ frame.grid(row=1 , column=0)
 start_btn = tk.Button(master=frame , text="Start" , command=start_btn_pressed, background="#231942")
 start_btn.pack()
 
-### Create button 2 
+###* Create button 2 
 
 
 ## Create function for reset button pressed 
@@ -92,10 +93,18 @@ frame.grid(row=1 , column=2)
 reset_btn = tk.Button(master=frame, text='Reset', command=reset_btn_pressed,background="#231942")
 reset_btn.pack()
 
-### Create button 3
+###* Create button 3
 
 def store_btn_pressed():
-    times_list.insert(0,"{:<.3f}s".format(running_time))
+    global saved_times_array
+    
+    temp = running_time
+    saved_times_array.append(temp)
+    sum_of_times_lbl.config(text="{:<.3f}s".format(max(0,sum(saved_times_array))))
+
+
+    times_list.insert(0,"{:<.3f}s".format(temp))
+    
     reset_btn_pressed()
 
 frame = tk.Frame(
@@ -107,7 +116,7 @@ frame.grid(row=1,column=1)
 store_btn = tk.Button(master=frame,text="Store", command=store_btn_pressed)
 store_btn.pack()
 
-### Times Display Label
+###* List of times Label
 
 frame = tk.Frame(
     master = window,
@@ -117,15 +126,17 @@ frame.grid(row=0, column=3,rowspan=2)
 times_list = tk.Listbox(frame, font = ('calibri',40, 'bold'),foreground = '#fff',width=11) 
 times_list.pack()
 
+###* Sum of times label
+
 frame = tk.Frame(
     master=window 
 )
 frame.grid(row=1,column=3)
 # test = sum(times_list)
-testlabl = tk.Label(frame, font = ('calibri',40, 'bold'), background = '#231942',foreground = '#e0b1cb',width=11,text="test") 
-testlabl.pack()
+sum_of_times_lbl = tk.Label(frame, font = ('calibri',40, 'bold'), background = '#231942',foreground = '#e0b1cb',width=11,text=max(0,sum(saved_times_array))) 
+sum_of_times_lbl.pack()
 
-#### Util Functions
+####* Util Functions
 
 ## Create a function that updates the timer_label recursively after a set timeß
 def movTime():
@@ -133,15 +144,22 @@ def movTime():
     global now
     global running_time
 
-    # TODO: Creating timers instead of getting a time for each tick
-    now = time.monotonic_ns() # Starts a timer each tick 
+    now = time.time() # Starts a timer each tick 
 
     print("Time {} ; Timer start flag {}".format(running_time,timer_started))
     
     if timer_started == True:
-        running_time += (now - prev_time)/10**8 # Running sum of time
+        
+        running_time += (now - prev_time) # 
+        hrs = running_time/3600 # 
+        hrs_mod = hrs - int(hrs) # 
+        mins = hrs_mod * 60 # 
+        mins_mod = mins - int(mins) 
+        secs = mins_mod * 60 
+
+        print("hrs {}, hR {}, mins {} , mR {} , secs {:<.3f} ".format(hrs,hrs_mod,mins,mins_mod,secs))
         # TODO: Format time to have minutes and hours
-        time_elapsed_string = "Time: {:<.3f}".format(running_time) # Format label string
+        time_elapsed_string = "Time: {}:{:02}:{:<.3f}".format(int(hrs),int(mins),secs) # Format label string
         timer_label.config(text=time_elapsed_string) #Update timer_label 
         
     prev_time = now # Reference to previous timer for math 
@@ -153,14 +171,14 @@ def on_close():
     user_quit = True
 
 
-#### Main function
+####* Main function
 
 def main():
     
     window.protocol("WM_DELETE_WINDOW", on_close) # handles for close button pressed event
 
     while True:
-
+        print("arr of times {} , sum: {}".format(saved_times_array,sum(saved_times_array)))
         movTime()
         if user_quit:
             
